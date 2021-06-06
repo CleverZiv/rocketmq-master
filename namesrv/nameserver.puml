@@ -1,0 +1,14 @@
+@startuml
+'https://plantuml.com/sequence-diagram
+
+autonumber
+
+NamesrvStratup -> NamesrvStratup: main
+NamesrvStratup -> NamesrvStratup: main0
+NamesrvStratup -> NamesrvStratup: createNamesrvController
+NamesrvStratup -> NamesrvConfig: Authentication Request
+Bob --> Alice: Authentication Response
+
+Alice -> Bob: Another authentication Request
+Alice <-- Bob: another authentication Response
+@enduml
