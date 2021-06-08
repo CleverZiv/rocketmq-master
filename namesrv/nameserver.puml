@@ -5,10 +5,11 @@ autonumber
 
 NamesrvStratup -> NamesrvStratup: main
 NamesrvStratup -> NamesrvStratup: main0
-NamesrvStratup -> NamesrvStratup: createNamesrvController
-NamesrvStratup -> NamesrvConfig: Authentication Request
-Bob --> Alice: Authentication Response
-
-Alice -> Bob: Another authentication Request
-Alice <-- Bob: another authentication Response
+group createNamesrvController
+NamesrvStratup -> NamesrvConfig: 初始化 namesrvConfig
+NamesrvStratup -> NettyServerConfig: 初始化 nettyServerConfig
+NamesrvStratup -> NamesrvStratup: 根据配置实例化 namesrvConfig \n 和 nettyServerConfig
+NamesrvStratup -> NamesrvController: createNamesrvController
+NamesrvController --> NamesrvStratup: controller 实例
+end
 @enduml
