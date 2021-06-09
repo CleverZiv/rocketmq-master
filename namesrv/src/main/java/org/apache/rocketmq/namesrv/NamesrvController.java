@@ -75,10 +75,13 @@ public class NamesrvController {
 
     public boolean initialize() {
 
+        // 加载 kv 配置
         this.kvConfigManager.load();
 
+        // 创建 netty 服务端
         this.remotingServer = new NettyRemotingServer(this.nettyServerConfig, this.brokerHousekeepingService);
 
+        // 创建接收客户端请求的线程池
         this.remotingExecutor =
             Executors.newFixedThreadPool(nettyServerConfig.getServerWorkerThreads(), new ThreadFactoryImpl("RemotingExecutorThread_"));
 
@@ -88,6 +91,7 @@ public class NamesrvController {
 
             @Override
             public void run() {
+                // 创建一个定时任务，每隔 10 秒扫描不活跃的 Broker
                 NamesrvController.this.routeInfoManager.scanNotActiveBroker();
             }
         }, 5, 10, TimeUnit.SECONDS);
