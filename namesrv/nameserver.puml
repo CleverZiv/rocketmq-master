@@ -7,9 +7,22 @@ NamesrvStratup -> NamesrvStratup: main
 NamesrvStratup -> NamesrvStratup: main0
 group createNamesrvController
 NamesrvStratup -> NamesrvConfig: 初始化 namesrvConfig
-NamesrvStratup -> NettyServerConfig: 初始化 nettyServerConfig
+NamesrvStratup -> NettyServerConfig: 初始化 nettyServerConfig(设置默认端口为9876)
 NamesrvStratup -> NamesrvStratup: 根据配置实例化 namesrvConfig \n 和 nettyServerConfig
-NamesrvStratup -> NamesrvController: createNamesrvController
+NamesrvStratup -> NamesrvController: 根据 namesrvConfig 和 nettyServerConfig \n 创建 NamesrvController
 NamesrvController --> NamesrvStratup: controller 实例
+NamesrvStratup -> NamesrvStratup: 保存所有的 namesrvConfig \n 和 nettyServerConfig 配置信息
+end
+group start(controller)
+NamesrvStratup -> NamesrvController: controller.initialize()
+group controller.initialize()
+NamesrvController -> NamesrvController: 加载 kv 配置信息
+NamesrvController -> NettyServerConfig: 创建 netty 服务端
+NamesrvController -> NettyServerConfig: 创建接收客户端请求的线程池
+NamesrvController -> NamesrvController: 注册线程池
+NamesrvController -> NamesrvController: 创建一个定时任务，每 10 秒扫描不活跃的 broker
+end
+NamesrvStratup -> NamesrvStratup: 注册了一个钩子方法，监听 JVM 退出事件，\n 在退出时进行 controller 的资源释放
+NamesrvStratup -> NamesrvStratup: 启动 controller
 end
 @enduml
