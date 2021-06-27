@@ -45,14 +45,14 @@ import org.apache.rocketmq.common.protocol.route.TopicRouteData;
 import org.apache.rocketmq.common.sysflag.TopicSysFlag;
 import org.apache.rocketmq.remoting.common.RemotingUtil;
 
-public class RouteInfoManager {
+public class RouteInfoManager { // 路由元信息管理者
     private static final InternalLogger log = InternalLoggerFactory.getLogger(LoggerName.NAMESRV_LOGGER_NAME);
     private final static long BROKER_CHANNEL_EXPIRED_TIME = 1000 * 60 * 2;
     private final ReadWriteLock lock = new ReentrantReadWriteLock();
-    private final HashMap<String/* topic */, List<QueueData>> topicQueueTable;
-    private final HashMap<String/* brokerName */, BrokerData> brokerAddrTable;
-    private final HashMap<String/* clusterName */, Set<String/* brokerName */>> clusterAddrTable;
-    private final HashMap<String/* brokerAddr */, BrokerLiveInfo> brokerLiveTable;
+    private final HashMap<String/* topic */, List<QueueData>> topicQueueTable;// Topic 消息队列的路由信息，消息发送时根据此表进行负载均衡
+    private final HashMap<String/* brokerName */, BrokerData> brokerAddrTable;// broker 地址信息
+    private final HashMap<String/* clusterName */, Set<String/* brokerName */>> clusterAddrTable;// 集群信息
+    private final HashMap<String/* brokerAddr */, BrokerLiveInfo> brokerLiveTable;// 存活的broker
     private final HashMap<String/* brokerAddr */, List<String>/* Filter Server */> filterServerTable;
 
     public RouteInfoManager() {
@@ -753,7 +753,7 @@ public class RouteInfoManager {
 }
 
 class BrokerLiveInfo {
-    private long lastUpdateTimestamp;
+    private long lastUpdateTimestamp; // broker 上次心跳上报的时间
     private DataVersion dataVersion;
     private Channel channel;
     private String haServerAddr;

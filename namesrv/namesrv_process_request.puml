@@ -1,0 +1,25 @@
+@startuml
+'https://plantuml.com/sequence-diagram
+
+autonumber
+
+NettyRemotingServer -> NettyRemotingServer: processRequestCommand
+note left #99FF99 : 继承抽象类 NettyRemotingAbstract \n 的方法
+group processRequestCommand
+alt 请求为同步请求
+NettyRemotingServer -> DefaultRequestProcessor: 调用 processRequest
+else 请求为异步请求
+NettyRemotingServer -> AsyncNettyRequestProcessor: 调用 asyncProcessRequest
+AsyncNettyRequestProcessor -> DefaultRequestProcessor: 调用 processRequest
+AsyncNettyRequestProcessor -> AsyncNettyRequestProcessor: 设置回调函数
+end
+group processRequest
+DefaultRequestProcessor -> DefaultRequestProcessor: 判断请求类型，本流程关注 REGISTER_BROKER \n 调用 registerBrokerWithFilterServer
+DefaultRequestProcessor -> RouteInfoManager: 调用路由元信息管理器的 registerBroker 方法
+RouteInfoManager -> RouteInfoManager: 修改路由元信息
+note left #99FF99: 1. 修改路由元信息需要加锁\n2. 修改 clusterAddrTable、brokerAddrTable、\nbrokerLiveTable（上报更新时间取当前系统时间）、filterServerTable\n3.topicConfigWrapper参数不为空时，更新topicQueueTable（消息队列的路由信息）
+RouteInfoManager --> DefaultRequestProcessor: 返回处理结果
+DefaultRequestProcessor --> NettyRemotingServer: 封装处理结果返回请求响应
+NettyRemotingServer -> NettyRemotingServer: 响应回写到 channel 中
+end
+@enduml

@@ -123,7 +123,7 @@ public class BrokerStartup {
 
             if (commandLine.hasOption('c')) {
                 String file = commandLine.getOptionValue('c');
-                if (file != null) {
+                if (file != null) { // 解析配置文件，填充配置类
                     configFile = file;
                     InputStream in = new BufferedInputStream(new FileInputStream(file));
                     properties = new Properties();
@@ -147,10 +147,10 @@ public class BrokerStartup {
                 System.exit(-2);
             }
 
-            String namesrvAddr = brokerConfig.getNamesrvAddr();
+            String namesrvAddr = brokerConfig.getNamesrvAddr(); // 获得 Namesrv 的地址字符串
             if (null != namesrvAddr) {
                 try {
-                    String[] addrArray = namesrvAddr.split(";");
+                    String[] addrArray = namesrvAddr.split(";"); // 以 ; 分割地址字符串
                     for (String addr : addrArray) {
                         RemotingUtil.string2SocketAddress(addr);
                     }

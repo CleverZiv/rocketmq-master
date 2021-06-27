@@ -29,7 +29,7 @@ import org.apache.rocketmq.remoting.exception.RemotingException;
 public interface MQProducer extends MQAdmin {
     void start() throws MQClientException;
 
-    void shutdown();
+    void shutdown();// 视频教程
 
     List<MessageQueue> fetchPublishMessageQueues(final String topic) throws MQClientException;
 

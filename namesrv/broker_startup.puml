@@ -1,0 +1,35 @@
+@startuml
+'https://plantuml.com/sequence-diagram
+
+autonumber
+
+BrokerStartup -> BrokerStartup: main
+BrokerStartup -> BrokerStartup: createBrokerController
+group createBrokerController
+BrokerStartup -> NettySystemConfig: 设置netty服务端的发送和接收buffer大小为128k
+BrokerStartup -> serverUtil: 读取输入的参数 args 为命令行参数
+BrokerStartup -> BrokerConfig: 新建 BrokerConfig 对象
+BrokerStartup -> NettyServerConfig: 新建 NettyServerConfig 对象，作为服务端用于接收生产者发送的消息(监听端口为10911)
+BrokerStartup -> NettyClientConfig: 新建 NettyClientConfig 对象，作为客户端用于发送心跳信息至 namesrv
+BrokerStartup -> MessageStoreConfig: 新建 MessageStoreConfig 对象，当前角色为slave时，设置可访问消息存储在内存的最大百分比为30
+BrokerStartup -> BrokerStartup: 解析命令行参数，获取到配置文件并解析，\n 结果填充至以上 XConfig 对象中
+BrokerStartup -> BrokerConfig: 获得配置的 namesrv 地址字符串，以 ; 分割获得所有namesrv 地址
+BrokerStartup -> MessageStoreConfig: 设置 brokerId，master则为0，slave则校验必须大于0
+BrokerStartup -> MessageStoreConfig: 判断 enableDLegerCommitLog，true 时 brokerId 设为-1
+note right #99FF99 : enableDLegerCommitLog 是否启用 DLedger，\n 即是否启用 RocketMQ 主从切换，默认值为 false。\n 如果需要开启主从切换，则该值需要设置为 true
+BrokerStartup -> BrokerController: 根据以上 config 对象创建 BrokerController 对象
+BrokerStartup -> BrokerController: 备份以上所有的配置信息，防止丢失
+BrokerStartup -> BrokerController: initialize
+BrokerController --> BrokerStartup: 返回 controller
+end
+BrokerStartup -> BrokerController: controller.start
+group controller.start
+BrokerController -> BrokerController: 创建线程池执行定时任务：向所有 namesrv 注册 broker
+BrokerController -> BrokerOuterAPI: 调用 BrokerOuterAPI 的 registerBrokerAll 方法
+note right #99FF99 : 将broker的地址、id、集群名等信息封装至请求头，将 topicConfig \n 等信息封装至请求体调用 registerBroker 方法将注册请求通过\n remotingClient（netty 客户端）\n 发送至 namesrv(CountDownLatch 保证同步)
+BrokerOuterAPI --> BrokerController: 返回注册结果
+BrokerController -> BrokerController: 更新集群 master 地址
+BrokerController --> BrokerStartup: 返回到主启动流程
+BrokerStartup -> BrokerStartup: 打印启动信息，返回 controller，启动流程结束
+end
+@enduml
