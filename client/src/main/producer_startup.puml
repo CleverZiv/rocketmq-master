@@ -1,0 +1,26 @@
+@startuml
+'https://plantuml.com/sequence-diagram
+
+autonumber
+
+DefaultMQProducer -> DefaultMQProducerImpl: start()
+group start()
+DefaultMQProducerImpl -> DefaultMQProducerImpl: 判断生产者状态 = CREATE_JUST，否则返回
+DefaultMQProducerImpl -> DefaultMQProducerImpl: 状态置为 START_FAILED
+DefaultMQProducerImpl -> DefaultMQProducerImpl: 校验生产者组是否合法（组名的相关校验）
+DefaultMQProducerImpl -> DefaultMQProducer: 更改生产者的实例名称为进程ID
+DefaultMQProducerImpl -> MQClientManager: 获取 MQ 客户端的实例
+MQClientManager -> MQClientInstance: 获取 MQ 客户端的实例
+note left:MQClientManager 看作是实例的工厂对象
+MQClientInstance --> MQClientManager: 返回 MQ 客户端的实例
+MQClientManager --> DefaultMQProducerImpl: 返回 MQ 客户端的实例
+DefaultMQProducerImpl -> MQClientInstance: 将当前生产者注册到客户端实例中
+note left: 以生产者组名为 key，\n当前生产者为 value
+MQClientInstance --> DefaultMQProducerImpl: 返回注册成功
+DefaultMQProducerImpl -> MQClientInstance: 启动客户端
+note left #99FF99: 包括启动 mQClientAPIImpl、pullMessageService、\n rebalanceService等
+DefaultMQProducerImpl -> DefaultMQProducerImpl: 生产者状态更新为 RUNNING
+DefaultMQProducerImpl -> MQClientInstance: 向所有的 broker 发送心跳
+end
+
+@enduml
