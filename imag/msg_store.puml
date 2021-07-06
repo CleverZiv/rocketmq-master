@@ -1,0 +1,69 @@
+@startuml
+'https://plantuml.com/sequence-diagram
+
+autonumber
+
+DefaultMessageStore -> DefaultMessageStore: checkStoreStatus()
+note left #FF8F59: 校验broker是否关闭、 是否\n是从节点，从节点不可写入消息
+DefaultMessageStore -> DefaultMessageStore: checkMessages()
+note left #6FB7B7: 校验topic名称（<127字节）、消息\n主体的长度（<4M）是否合法
+DefaultMessageStore -> CommitLog: putMessage(MessageExtBrokerInner msg)
+group putMessage
+alt 事务类型为TRANSACTION_NOT_TYPE或TRANSACTION_COMMIT_TYPE
+CommitLog -> CommitLog: 获取DelayTimeLevel（超过时取最大）
+CommitLog -> CommitLog: 重命名topic和queueId为SCHEDULE_TOPIC_XXXX和delayLevel - 1
+CommitLog -> MessageAccessor: putProperty备份真实的topic和queueId
+MessageAccessor -> Message: putProperty
+end
+CommitLog -> MappedFileQueue: 获取最新的MappedFile（最新的即为当前可写入的）
+MappedFileQueue --> CommitLog: 返回 MappedFile
+group putMessageLock.lock()
+CommitLog -> MessageExt: 设置StoreTimestamp，**用于保证全局有序**
+CommitLog -> MappedFile: MappedFile 为空或已满->获取新的 MappedFile
+MappedFile --> CommitLog: 返回新的 MappedFile
+CommitLog -> MappedFile: appendMessage() -> appendMessagesInner()
+group appendMessagesInner()
+MappedFile -> MappedFile: 获取当前写指针（写指针的位置需小于文件大小）
+MappedFile -> CommitLog: doAppend 将消息写入缓冲区byteBuffer(堆外内存)
+group doAppend
+CommitLog -> MessageDecoder: 生成消息id
+MessageDecoder --> CommitLog: 返回消息id
+CommitLog -> CommitLog: 获得消息在队列中的偏移量
+CommitLog -> CommitLog: 计算消息总长度
+CommitLog -> CommitLog: 判断消息总长度是否超过文件大小，超过则创建新文件
+CommitLog -> ByteBuffer: 将消息写入缓冲区
+alt 事务类型为 TRANSACTION_COMMIT_TYPE
+CommitLog -> CommitLog: 更新消息偏移量
+end
+CommitLog --> CommitLog: 返回结果
+end
+end
+CommitLog -> CommitLog: 释放锁
+end
+CommitLog -> CommitLog: handleDiskFlush 刷盘
+CommitLog -> CommitLog: handleHA 同步
+end
+@enduml
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
