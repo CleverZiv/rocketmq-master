@@ -232,9 +232,13 @@ public class DefaultMessageStore implements MessageStore {
         {
             /**
              * 1. Make sure the fast-forward messages to be truncated during the recovering according to the max physical offset of the commitlog;
+             * 确保根据commitlog的最大物理偏移量在恢复过程中截断快进消息；
              * 2. DLedger committedPos may be missing, so the maxPhysicalPosInLogicQueue maybe bigger that maxOffset returned by DLedgerCommitLog, just let it go;
+             * DLedger commitedPos 可能丢失了，所以maxPhysicalPosInLogicQueue 可能比DLedgerCommitLog 返回的m axOffset 大，不用管；
              * 3. Calculate the reput offset according to the consume queue;
+             * 根据消费队列计算reput offset
              * 4. Make sure the fall-behind messages to be dispatched before starting the commitlog, especially when the broker role are automatically changed.
+             * 确保在启动提交日志之前分派后备消息，尤其是当代理角色自动更改时。
              */
             long maxPhysicalPosInLogicQueue = commitLog.getMinOffset();
             for (ConcurrentMap<Integer, ConsumeQueue> maps : this.consumeQueueTable.values()) {
@@ -266,7 +270,9 @@ public class DefaultMessageStore implements MessageStore {
 
             /**
              *  1. Finish dispatching the messages fall behind, then to start other services.
+             *  调度完落后的消息，再启动其他服务。
              *  2. DLedger committedPos may be missing, so here just require dispatchBehindBytes <= 0
+             *  DLedgermittedPos 可能会丢失，所以这里只需要 dispatchBehindBytes <= 0
              */
             while (true) {
                 if (dispatchBehindBytes() <= 0) {

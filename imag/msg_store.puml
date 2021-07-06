@@ -1,0 +1,18 @@
+@startuml
+'https://plantuml.com/sequence-diagram
+
+autonumber
+
+DefaultMessageStore -> DefaultMessageStore: checkStoreStatus()
+note left #FF8F59: 校验broker是否关闭、 是否\n是从节点，从节点不可写入消息
+DefaultMessageStore -> DefaultMessageStore: checkMessages()
+note left #6FB7B7: 校验topic名称（<127字节）、消息\n主体的长度（<4M）是否合法
+DefaultMessageStore -> CommitLog: putMessage(MessageExtBrokerInner msg)
+group putMessage
+alt 事务类型为TRANSACTION_NOT_TYPE或TRANSACTION_COMMIT_TYPE
+
+else
+end
+CommitLog -> CommitLog:
+end
+@enduml

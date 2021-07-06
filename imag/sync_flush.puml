@@ -1,0 +1,20 @@
+@startuml
+'https://plantuml.com/sequence-diagram
+
+autonumber
+
+CommitLog -> GroupCommitService: 获取 GroupCommitService 实例
+GroupCommitService --> CommitLog: 返回 GroupCommitService 实例
+CommitLog -> GroupCommitRequest: 构建 GroupCommitRequest，参数为需要刷多少字节的偏移量
+GroupCommitRequest --> CommitLog: 返回 GroupCommitRequest
+CommitLog -> GroupCommitService: 提交 GroupCommitRequest 到 \nGroupCommitService 中的 requestWrite
+GroupCommitService -> GroupCommitService: 交换 requestWrite 和 requestRead
+loop
+GroupCommitService -> GroupCommitService: 遍历 requestRead
+loop 消息可能跨文件存在，所以最多需要 flush 2次
+GroupCommitService -> GroupCommitService: 判断已刷盘的指针是否大于待刷盘的指针\n（指针是消息的尾部位置）
+end
+GroupCommitService -> CommitLog: 返回刷盘结果
+GroupCommitService -> StoreCheckPoint: 更新刷盘监测节点
+end
+@enduml
