@@ -29,11 +29,15 @@ import org.apache.rocketmq.logging.InternalLoggerFactory;
 public class NamesrvConfig {
     private static final InternalLogger log = InternalLoggerFactory.getLogger(LoggerName.NAMESRV_LOGGER_NAME);
 
+    // rocketmq 主目录，通过设置 ROCKETMQ_HOME 配置主目录，在源码环境搭建的过程中有这一步
     private String rocketmqHome = System.getProperty(MixAll.ROCKETMQ_HOME_PROPERTY, System.getenv(MixAll.ROCKETMQ_HOME_ENV));
+    // 用于存储 KV配置的持久化路径
     private String kvConfigPath = System.getProperty("user.home") + File.separator + "namesrv" + File.separator + "kvConfig.json";
+    // 默认配置文件路径，不生效。若需要在启动时配置 NameServer 启动属性，使用 -c 配置文件路径 的方法
     private String configStorePath = System.getProperty("user.home") + File.separator + "namesrv" + File.separator + "namesrv.properties";
     private String productEnvName = "center";
     private boolean clusterTest = false;
+    // 是否支持顺序消息，默认不支持，没大用，就是在处理客户端获取路由数据时标识下，如果支持顺序消息，需要返回对应 topic 的顺序消息配置属性
     private boolean orderMessageEnable = false;
 
     public boolean isOrderMessageEnable() {

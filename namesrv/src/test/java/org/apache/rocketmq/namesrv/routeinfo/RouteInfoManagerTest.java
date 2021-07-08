@@ -119,4 +119,9 @@ public class RouteInfoManagerTest {
         byte[] topicList = routeInfoManager.getHasUnitSubUnUnitTopicList();
         assertThat(topicList).isNotNull();
     }
+
+    @Test
+    public void TestHome() {
+        System.out.println(System.getProperty("user.home"));
+    }
 }
