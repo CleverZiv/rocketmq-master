@@ -881,12 +881,14 @@ public class BrokerController {
             this.filterServerManager.start();
         }
 
+        // 1. 在 broker 启动时，先做一次注册
         if (!messageStoreConfig.isEnableDLegerCommitLog()) {
             startProcessorByHa(messageStoreConfig.getBrokerRole());
             handleSlaveSynchronize(messageStoreConfig.getBrokerRole());
             this.registerBrokerAll(true, false, true);
         }
 
+        // 2. 接下来先延迟 10s，然后每隔30s进行一次注册
         this.scheduledExecutorService.scheduleAtFixedRate(new Runnable() {
 
             @Override

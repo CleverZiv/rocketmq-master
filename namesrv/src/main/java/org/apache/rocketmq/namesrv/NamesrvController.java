@@ -157,9 +157,11 @@ public class NamesrvController {
     }
 
     public void start() throws Exception {
+        // 启动 netty 服务端，用于接收客户端请求
         this.remotingServer.start();
 
         if (this.fileWatchService != null) {
+            // 启动监听TLS配置文件的线程
             this.fileWatchService.start();
         }
     }
