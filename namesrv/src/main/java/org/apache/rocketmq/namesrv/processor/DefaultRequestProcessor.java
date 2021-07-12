@@ -261,6 +261,7 @@ public class DefaultRequestProcessor extends AsyncNettyRequestProcessor implemen
 
         Boolean changed = this.namesrvController.getRouteInfoManager().isBrokerTopicConfigChanged(requestHeader.getBrokerAddr(), dataVersion);
         if (!changed) {
+            // dataVersion 没改变，只需要更新下心跳的最新时间
             this.namesrvController.getRouteInfoManager().updateBrokerInfoUpdateTimestamp(requestHeader.getBrokerAddr());
         }
 

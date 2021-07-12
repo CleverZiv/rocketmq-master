@@ -931,8 +931,11 @@ public class BrokerController {
     }
 
     public synchronized void registerBrokerAll(final boolean checkOrderConfig, boolean oneway, boolean forceRegister) {
+        // topicConfigWrapper 中封装了 该broker 上的 topic 信息和 dataVersion
         TopicConfigSerializeWrapper topicConfigWrapper = this.getTopicConfigManager().buildTopicConfigSerializeWrapper();
 
+        // 这块代码的作用是将 topicConfigWrapper 中的值取出来重新封装一遍，又再塞回 topicConfigWrapper，我理解是为了将 this.brokerConfig.getBrokerPermission()
+        // 的属性值 set 进去。不过这并不是很重要的细节，我们只要知道 topicConfigWrapper 至少包含了该broker 上的 topic 信息和 dataVersion 即可
         if (!PermName.isWriteable(this.getBrokerConfig().getBrokerPermission())
             || !PermName.isReadable(this.getBrokerConfig().getBrokerPermission())) {
             ConcurrentHashMap<String, TopicConfig> topicConfigTable = new ConcurrentHashMap<String, TopicConfig>();

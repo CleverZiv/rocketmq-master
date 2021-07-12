@@ -26,7 +26,17 @@ public class Message implements Serializable {
     private static final long serialVersionUID = 8445773977080406428L;
 
     private String topic;
-    private int flag;
+    private int flag; // 取值范围：MessageSysFlag
+    /**
+     * properties： 键值对的形式存储消息的相关扩展属性，可扩展的属性定义在：MessageConst
+     * 常用的扩展属性有：
+     * tag: 消息 tag，在实际应用中常用来作为业务的标识，用于业务过滤出属于自己的消息进而消费
+     * keys: Message 索引键，多个用空格隔开，根据这些 Key 可快速检索到消息
+     * waitStoreMsgOK： 消息发送时是否等待消息存储完成后再返回
+     * deleyTimeLevel：消息延迟级别，用于定时消息或消息重试
+     *
+     *
+     */
     private Map<String, String> properties;
     private byte[] body;
     private String transactionId;

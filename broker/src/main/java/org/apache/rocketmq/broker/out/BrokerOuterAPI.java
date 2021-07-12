@@ -140,7 +140,9 @@ public class BrokerOuterAPI {
             final byte[] body = requestBody.encode(compressed);
             final int bodyCrc32 = UtilAll.crc32(body);
             requestHeader.setBodyCrc32(bodyCrc32);
+            // CountDownLatch 使得只有所有 nameServer 的响应结果都返回时才会继续执行后续的逻辑
             final CountDownLatch countDownLatch = new CountDownLatch(nameServerAddressList.size());
+            // 遍历所有的 NameServer，并将注册任务 registerBroker 丢进 brokerOuterExecutor 线程池中执行
             for (final String namesrvAddr : nameServerAddressList) {
                 brokerOuterExecutor.execute(new Runnable() {
                     @Override
@@ -155,6 +157,7 @@ public class BrokerOuterAPI {
                         } catch (Exception e) {
                             log.warn("registerBroker Exception, {}", namesrvAddr, e);
                         } finally {
+                            // 每返回一个结果，减1
                             countDownLatch.countDown();
                         }
                     }
@@ -162,6 +165,7 @@ public class BrokerOuterAPI {
             }
 
             try {
+                // 主线程阻塞在此，直到所有的 countDownLatch 减为0
                 countDownLatch.await(timeoutMills, TimeUnit.MILLISECONDS);
             } catch (InterruptedException e) {
             }
@@ -291,6 +295,7 @@ public class BrokerOuterAPI {
                                     byte[] body = response.getBody();
                                     if (body != null) {
                                         nameServerDataVersion = DataVersion.decode(body, DataVersion.class);
+                                        // brokerConfig 在 nameserver端存储的数据版本与当前版本不一致时需要注册
                                         if (!topicConfigWrapper.getDataVersion().equals(nameServerDataVersion)) {
                                             changed = true;
                                         }
