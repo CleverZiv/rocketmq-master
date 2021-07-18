@@ -195,6 +195,7 @@ public class NettyRemotingServer extends NettyRemotingAbstract implements Remoti
 
         prepareSharableHandlers();
 
+        // ServerBootstrap：netty服务启动的辅助类
         ServerBootstrap childHandler =
             this.serverBootstrap.group(this.eventLoopGroupBoss, this.eventLoopGroupSelector)
                 .channel(useEpoll() ? EpollServerSocketChannel.class : NioServerSocketChannel.class)
@@ -205,17 +206,17 @@ public class NettyRemotingServer extends NettyRemotingAbstract implements Remoti
                 .childOption(ChannelOption.SO_SNDBUF, nettyServerConfig.getServerSocketSndBufSize())
                 .childOption(ChannelOption.SO_RCVBUF, nettyServerConfig.getServerSocketRcvBufSize())
                 .localAddress(new InetSocketAddress(this.nettyServerConfig.getListenPort()))
-                .childHandler(new ChannelInitializer<SocketChannel>() {
+                .childHandler(new ChannelInitializer<SocketChannel>() { // Handler：理解为业务逻辑处理器
                     @Override
                     public void initChannel(SocketChannel ch) throws Exception {
-                        ch.pipeline()
+                        ch.pipeline() // pipeline：一组 Handler 的链条
                             .addLast(defaultEventExecutorGroup, HANDSHAKE_HANDLER_NAME, handshakeHandler)
                             .addLast(defaultEventExecutorGroup,
                                 encoder,
                                 new NettyDecoder(),
                                 new IdleStateHandler(0, 0, nettyServerConfig.getServerChannelMaxIdleTimeSeconds()),
                                 connectionManageHandler,
-                                serverHandler  // 处理发送过来的消息的核心处理逻辑
+                                serverHandler  // ☆☆ 处理发送过来的消息的核心处理逻辑
                             );
                     }
                 });

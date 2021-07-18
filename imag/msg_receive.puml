@@ -1,0 +1,13 @@
+@startuml
+'https://plantuml.com/sequence-diagram
+
+autonumber
+
+BrokerController -> NettyRemotingServer: remotingServer.start()
+note left: 启动netty服务端\n监听客户端的消息发送请求
+NettyRemotingServer -> NettyRemotingAbstract: processMessageReceived()
+NettyRemotingAbstract -> SendMessageProcessor: asyncProcessRequest()
+SendMessageProcessor -> SendMessageProcessor: asyncSendMessage()
+SendMessageProcessor -> DefaultMessageStore: asyncPutMessage()
+note left: 调用消息存储组件存储消息
+@enduml
